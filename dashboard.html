@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>GCAI Dashboard</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+</head>
+<body class="p-4">
+    <div class="container">
+        <h1 class="mb-4 text-center">🌍 GCAI Dashboard</h1>
+
+        <!-- Filter + Refresh -->
+        <form method="get" action="/" class="row g-3 mb-3">
+            <div class="col-auto">
+                <input type="date" name="date" value="{{ selected_date }}" class="form-control">
+            </div>
+            <div class="col-auto">
+                <select name="date" class="form-select">
+                    {% for d in available_dates %}
+                        <option value="{{ d }}" {% if d == selected_date %}selected{% endif %}>{{ d }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div class="col-auto">
+                <button type="submit" class="btn btn-primary">📅 Filter</button>
+                <a href="/refresh" class="btn btn-success">🔄 Refresh Now</a>
+            </div>
+        </form>
+
+        <table class="table table-striped table-bordered">
+            <thead class="table-dark">
+                <tr>
+                    <th>Time</th>
+                    <th>Headline</th>
+                    <th>Source</th>
+                    <th>Category</th>
+                    <th>Bias</th>
+                    <th>Action</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for row in news %}
+                <tr>
+                    <td>{{ row[3] }}</td>
+                    <td><a href="{{ row[2] }}" target="_blank">{{ row[1] }}</a></td>
+                    <td>{{ row[2] }}</td>
+                    <td>{{ row[4] or "Unclassified" }}</td>
+                    <td>{{ row[5] or "Unclassified" }}</td>
+                    <td>
+                        <form method="POST" action="/classify/{{ row[0] }}">
+                            <select name="category" class="form-select d-inline w-auto">
+                                <option value="Conflict" {% if row[4] == "Conflict" %}selected{% endif %}>Conflict</option>
+                                <option value="Economy" {% if row[4] == "Economy" %}selected{% endif %}>Economy</option>
+                                <option value="Health" {% if row[4] == "Health" %}selected{% endif %}>Health</option>
+                                <option value="Technology" {% if row[4] == "Technology" %}selected{% endif %}>Technology</option>
+                                <option value="Environment" {% if row[4] == "Environment" %}selected{% endif %}>Environment</option>
+                            </select>
+                            <select name="bias" class="form-select d-inline w-auto">
+                                <option value="Neutral" {% if row[5] == "Neutral" %}selected{% endif %}>Neutral</option>
+                                <option value="Potential Bias" {% if row[5] == "Potential Bias" %}selected{% endif %}>Potential Bias</option>
+                            </select>
+                            <button type="submit" class="btn btn-primary btn-sm">Save</button>
+                        </form>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+
+        <!-- Pagination -->
+        <nav>
+            <ul class="pagination justify-content-center">
+                {% if page > 1 %}
+                <li class="page-item"><a class="page-link" href="{{ url_for('dashboard', page=page-1, date=selected_date) }}">Previous</a></li>
+                {% endif %}
+
+                {% for p in range(1, total_pages+1) %}
+                <li class="page-item {% if p == page %}active{% endif %}">
+                    <a class="page-link" href="{{ url_for('dashboard', page=p, date=selected_date) }}">{{ p }}</a>
+                </li>
+                {% endfor %}
+
+                {% if page < total_pages %}
+                <li class="page-item"><a class="page-link" href="{{ url_for('dashboard', page=page+1, date=selected_date) }}">Next</a></li>
+                {% endif %}
+            </ul>
+        </nav>
+    </div>
+</body>
+</html>
