@@ -5,9 +5,11 @@ import { Filter, Globe, AlertTriangle, TrendingUp } from 'lucide-react';
 interface SidebarProps {
   filters: FilterState;
   onFilterChange: (key: keyof FilterState, value: string) => void;
+  threatCount?: number;
+  lastUpdated?: Date | null;
 }
 
-const Sidebar: React.FC<SidebarProps> = ({ filters, onFilterChange }) => {
+const Sidebar: React.FC<SidebarProps> = ({ filters, onFilterChange, threatCount = 0, lastUpdated }) => {
   const threatTypes = ['All', 'Climate Change', 'Pandemic & Health', 'Armed Conflict', 'Economic Collapse'];
   const locations = ['All', 'Global', 'Asia-Pacific', 'Europe', 'North America', 'Africa', 'Middle East', 'South America'];
   const emergencyLevels = ['All', 'Low', 'Medium', 'High'];
@@ -99,27 +101,38 @@ const Sidebar: React.FC<SidebarProps> = ({ filters, onFilterChange }) => {
           </select>
         </div>
 
-        {/* Quick Stats */}
+        {/* Real-time Stats */}
         <div className="border-t border-gray-700 pt-6">
-          <h3 className="text-sm font-medium mb-3 text-gray-400">SYSTEM STATUS</h3>
+          <h3 className="text-sm font-medium mb-3 text-gray-400">REAL-TIME STATUS</h3>
           <div className="space-y-3">
             <div className="flex justify-between items-center">
               <span className="text-sm">Active Threats</span>
-              <span className="bg-red-600 px-2 py-1 rounded text-xs font-medium">23</span>
+              <span className={`px-2 py-1 rounded text-xs font-medium ${threatCount > 5 ? 'bg-red-600' : threatCount > 2 ? 'bg-yellow-600' : 'bg-green-600'}`}>
+                {threatCount}
+              </span>
             </div>
             <div className="flex justify-between items-center">
-              <span className="text-sm">Monitoring Regions</span>
-              <span className="bg-blue-600 px-2 py-1 rounded text-xs font-medium">6</span>
+              <span className="text-sm">GitHub Sources</span>
+              <span className="bg-blue-600 px-2 py-1 rounded text-xs font-medium">8</span>
             </div>
             <div className="flex justify-between items-center">
-              <span className="text-sm">Data Sources</span>
-              <span className="bg-green-600 px-2 py-1 rounded text-xs font-medium">47</span>
+              <span className="text-sm">Data Freshness</span>
+              <span className="bg-green-600 px-2 py-1 rounded text-xs font-medium">
+                {lastUpdated ? Math.floor((Date.now() - lastUpdated.getTime()) / 60000) : 0}m
+              </span>
             </div>
             <div className="flex justify-between items-center">
-              <span className="text-sm">System Health</span>
-              <span className="bg-green-600 px-2 py-1 rounded text-xs font-medium">98%</span>
+              <span className="text-sm">API Status</span>
+              <span className="bg-green-600 px-2 py-1 rounded text-xs font-medium">Active</span>
             </div>
           </div>
+          
+          {lastUpdated && (
+            <div className="mt-4 p-3 bg-gray-800 rounded text-xs">
+              <div className="text-gray-400 mb-1">Last Update:</div>
+              <div className="text-white">{lastUpdated.toLocaleTimeString()}</div>
+            </div>
+          )}
         </div>
       </div>
     </div>

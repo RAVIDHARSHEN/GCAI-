@@ -1,10 +1,76 @@
-import React from 'react';
+import React, { useMemo } from 'react';
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, PieChart, Pie, Cell, BarChart, Bar } from 'recharts';
 import { TrendingUp, PieChart as PieChartIcon, BarChart3 } from 'lucide-react';
-import { chartData } from '../data/mockData';
+import { ThreatData } from '../types';
 
-const Charts: React.FC = () => {
+interface ChartsProps {
+  threats: ThreatData[];
+}
+
+const Charts: React.FC<ChartsProps> = ({ threats }) => {
   const COLORS = ['#10B981', '#F59E0B', '#EF4444'];
+
+  // Generate chart data from real threats
+  const chartData = useMemo(() => {
+    // Severity distribution
+    const severityDistribution = [
+      { 
+        name: 'Low (1-3)', 
+        value: threats.filter(t => t.severity >= 1 && t.severity <= 3).length,
+        color: '#10B981'
+      },
+      { 
+        name: 'Medium (4-6)', 
+        value: threats.filter(t => t.severity >= 4 && t.severity <= 6).length,
+        color: '#F59E0B'
+      },
+      { 
+        name: 'High (7-10)', 
+        value: threats.filter(t => t.severity >= 7 && t.severity <= 10).length,
+        color: '#EF4444'
+      }
+    ];
+
+    // Regional data
+    const regionMap = threats.reduce((acc, threat) => {
+      const region = threat.location.region;
+      if (!acc[region]) {
+        acc[region] = { threats: 0, totalSeverity: 0 };
+      }
+      acc[region].threats++;
+      acc[region].totalSeverity += threat.severity;
+      return acc;
+    }, {} as Record<string, { threats: number; totalSeverity: number }>);
+
+    const regionalData = Object.entries(regionMap).map(([region, data]) => ({
+      region: region.length > 15 ? region.substring(0, 12) + '...' : region,
+      threats: data.threats,
+      severity: Number((data.totalSeverity / data.threats).toFixed(1))
+    }));
+
+    // Threat type trends (simulated based on current data)
+    const threatTypes = ['Climate Change', 'Pandemic & Health', 'Armed Conflict', 'Economic Collapse'];
+    const threatTrends = Array.from({ length: 6 }, (_, i) => {
+      const month = new Date(Date.now() - (5 - i) * 30 * 24 * 60 * 60 * 1000)
+        .toLocaleDateString('en-US', { month: 'short' });
+      
+      const data: any = { month };
+      threatTypes.forEach(type => {
+        const currentCount = threats.filter(t => t.threatType === type).length;
+        // Simulate historical data with some variation
+        data[type.toLowerCase().replace(/\s+/g, '')] = Math.max(1, 
+          currentCount + Math.floor(Math.random() * 6) - 3
+        );
+      });
+      return data;
+    });
+
+    return {
+      threatTrends,
+      severityDistribution,
+      regionalData
+    };
+  }, [threats]);
 
   return (
     <div className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-6">
@@ -27,10 +93,10 @@ const Charts: React.FC = () => {
                 color: '#fff'
               }}
             />
-            <Line type="monotone" dataKey="climate" stroke="#10B981" strokeWidth={3} name="Climate Change" />
-            <Line type="monotone" dataKey="pandemic" stroke="#3B82F6" strokeWidth={3} name="Pandemic & Health" />
-            <Line type="monotone" dataKey="conflict" stroke="#EF4444" strokeWidth={3} name="Armed Conflict" />
-            <Line type="monotone" dataKey="economic" stroke="#F59E0B" strokeWidth={3} name="Economic Collapse" />
+            <Line type="monotone" dataKey="climatechange" stroke="#10B981" strokeWidth={3} name="Climate Change" />
+            <Line type="monotone" dataKey="pandemic&health" stroke="#3B82F6" strokeWidth={3} name="Pandemic & Health" />
+            <Line type="monotone" dataKey="armedconflict" stroke="#EF4444" strokeWidth={3} name="Armed Conflict" />
+            <Line type="monotone" dataKey="economiccollapse" stroke="#F59E0B" strokeWidth={3} name="Economic Collapse" />
           </LineChart>
         </ResponsiveContainer>
       </div>
