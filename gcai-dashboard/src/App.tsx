@@ -93,10 +93,10 @@ function App() {
             <div className="flex items-center justify-between">
               <div className="flex-1">
                 <div className="flex items-center gap-3">
-                  <h1 className="text-2xl font-bold text-gray-900">Crisis Intelligence Dashboard</h1>
+                  <h1 className="text-2xl font-bold text-gray-900">GCAI Crisis Intelligence Dashboard</h1>
                   <div className="flex items-center gap-2">
                     <Wifi className="w-4 h-4 text-green-500" />
-                    <span className="text-sm text-green-600 font-medium">Real-time</span>
+                    <span className="text-sm text-green-600 font-medium">Live Data</span>
                   </div>
                 </div>
                 <div className="flex items-center gap-4 mt-1">
